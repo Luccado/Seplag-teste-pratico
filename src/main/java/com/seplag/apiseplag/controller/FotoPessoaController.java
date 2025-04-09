@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,6 +26,28 @@ import java.util.Map;
 public class FotoPessoaController {
 
     private final FotoPessoaService fotoPessoaService;
+
+    @Operation(
+        summary = "Listar todas as fotos",
+        description = "Retorna todas as fotos armazenadas no MinIO"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Fotos listadas com sucesso",
+                    content = @Content(schema = @Schema(implementation = List.class))),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor",
+                    content = @Content(schema = @Schema(implementation = Map.class)))
+    })
+    @GetMapping
+    public ResponseEntity<?> listarTodasFotos() {
+        try {
+            List<FotoPessoa> fotos = fotoPessoaService.listarTodasFotos();
+            return new ResponseEntity<>(fotos, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> erro = new HashMap<>();
+            erro.put("erro", "Erro ao listar fotos: " + e.getMessage());
+            return new ResponseEntity<>(erro, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @Operation(
         summary = "Upload de foto de pessoa",

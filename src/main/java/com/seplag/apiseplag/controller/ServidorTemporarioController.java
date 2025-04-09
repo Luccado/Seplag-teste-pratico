@@ -4,6 +4,7 @@ import com.seplag.apiseplag.model.Pessoa;
 import com.seplag.apiseplag.model.ServidorTemporario;
 import com.seplag.apiseplag.services.PessoaService;
 import com.seplag.apiseplag.services.ServidorTemporarioService;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/servidores-temporarios")
+@Hidden
 public class ServidorTemporarioController {
 
     private final ServidorTemporarioService servidorTemporarioService;

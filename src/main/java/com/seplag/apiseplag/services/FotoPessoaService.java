@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +22,14 @@ public class FotoPessoaService {
 
     private final FotoPessoaRepository fotoPessoaRepository;
     private final PessoaService pessoaService;
+
+    /**
+     * Lista todas as fotos de pessoas cadastradas no sistema
+     * @return Lista de todas as fotos
+     */
+    public List<FotoPessoa> listarTodasFotos() {
+        return fotoPessoaRepository.findAll();
+    }
 
     @Transactional
     public FotoPessoa uploadFoto(MultipartFile arquivo, Integer pessoaId) {
