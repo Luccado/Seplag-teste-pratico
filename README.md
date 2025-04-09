@@ -24,6 +24,11 @@
 
 A API SEPLAG é um sistema de gerenciamento de recursos humanos desenvolvido para a Secretaria de Estado do Planejamento, Gestão e Patrimônio. O sistema permite o gerenciamento de servidores (efetivos e temporários), suas lotações, unidades administrativas e documentação pessoal, incluindo fotos.
 
+Projeto prático para Processo seletivo Seplag 2025
+Nome do candidato: LUCCA SOUZA DI OLIVEIRA
+Número de inscrição: 9686 - DESENVOLVEDOR JAVA (BACK-END) - JÚNIOR
+Número de inscrição: 9695 - DESENVOLVEDOR JAVA (BACK-END) - PLENO
+
 ## ✨ Funcionalidades Principais
 
 - 📋 Gerenciamento de Servidores (Efetivos e Temporários)
