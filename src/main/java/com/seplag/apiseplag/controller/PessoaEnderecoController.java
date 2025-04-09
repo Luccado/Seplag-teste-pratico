@@ -15,9 +15,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/pessoa-endereco")
+@Tag(name = "Endereços de Pessoas", description = "API para gerenciamento de endereços de pessoas")
 public class PessoaEnderecoController {
 
     private final PessoaEnderecoService pessoaEnderecoService;
@@ -35,10 +45,21 @@ public class PessoaEnderecoController {
         this.enderecoService = enderecoService;
     }
 
+    @Operation(
+        summary = "Listar todos os endereços de pessoas",
+        description = "Retorna uma página HTML com todos os endereços cadastrados para pessoas no sistema"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Página de endereços carregada com sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping
     public String listarTodos(
+            @Parameter(description = "Número da página (começando em 0)")
             @RequestParam(defaultValue = "0") int pagina,
+            @Parameter(description = "Campo para ordenação")
             @RequestParam(defaultValue = "id") String ordenarPor,
+            @Parameter(description = "Direção da ordenação (asc/desc)")
             @RequestParam(defaultValue = "asc") String direcao,
             Model model) {
 
@@ -53,11 +74,24 @@ public class PessoaEnderecoController {
         return "pessoa-endereco/lista";
     }
 
+    @Operation(
+        summary = "Listar endereços por pessoa",
+        description = "Retorna uma página HTML com todos os endereços de uma pessoa específica"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Página de endereços da pessoa carregada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Pessoa não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/pessoa/{pessoaId}")
     public String listarPorPessoa(
+            @Parameter(description = "ID da pessoa", required = true)
             @PathVariable Integer pessoaId,
+            @Parameter(description = "Número da página (começando em 0)")
             @RequestParam(defaultValue = "0") int pagina,
+            @Parameter(description = "Campo para ordenação")
             @RequestParam(defaultValue = "id") String ordenarPor,
+            @Parameter(description = "Direção da ordenação (asc/desc)")
             @RequestParam(defaultValue = "asc") String direcao,
             Model model) {
 
@@ -76,6 +110,14 @@ public class PessoaEnderecoController {
         return "pessoa-endereco/lista-por-pessoa";
     }
 
+    @Operation(
+        summary = "Exibir formulário de nova associação",
+        description = "Retorna uma página HTML com o formulário para criar uma nova associação entre pessoa e endereço"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Formulário carregado com sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/nova")
     public String exibirFormulario(Model model) {
         // Usando paginação para obter todas as pessoas
@@ -92,9 +134,19 @@ public class PessoaEnderecoController {
         return "pessoa-endereco/formulario";
     }
 
+    @Operation(
+        summary = "Salvar nova associação",
+        description = "Cria uma nova associação entre pessoa e endereço"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Redirecionamento após sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @PostMapping("/salvar")
     public String salvar(
+            @Parameter(description = "ID da pessoa", required = true)
             @RequestParam Integer pessoaId,
+            @Parameter(description = "ID do endereço", required = true)
             @RequestParam Integer enderecoId,
             RedirectAttributes redirectAttributes) {
 
@@ -108,8 +160,18 @@ public class PessoaEnderecoController {
         }
     }
 
+    @Operation(
+        summary = "Remover associação por ID",
+        description = "Remove uma associação entre pessoa e endereço pelo ID da associação"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Redirecionamento após sucesso"),
+        @ApiResponse(responseCode = "404", description = "Associação não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/remover/{id}")
     public String remover(
+            @Parameter(description = "ID da associação", required = true)
             @PathVariable Integer id,
             RedirectAttributes redirectAttributes) {
 
@@ -123,9 +185,20 @@ public class PessoaEnderecoController {
         return "redirect:/pessoa-endereco";
     }
 
+    @Operation(
+        summary = "Remover associação por pessoa e endereço",
+        description = "Remove uma associação entre pessoa e endereço pelos IDs da pessoa e do endereço"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Redirecionamento após sucesso"),
+        @ApiResponse(responseCode = "404", description = "Associação não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/remover/pessoa/{pessoaId}/endereco/{enderecoId}")
     public String removerPorPessoaEEndereco(
+            @Parameter(description = "ID da pessoa", required = true)
             @PathVariable Integer pessoaId,
+            @Parameter(description = "ID do endereço", required = true)
             @PathVariable Integer enderecoId,
             RedirectAttributes redirectAttributes) {
 

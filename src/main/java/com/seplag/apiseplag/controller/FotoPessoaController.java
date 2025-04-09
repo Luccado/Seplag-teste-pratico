@@ -7,6 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +21,28 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/fotos")
 @RequiredArgsConstructor
+@Tag(name = "Fotos de Pessoas", description = "API para gerenciamento de fotos de pessoas")
 public class FotoPessoaController {
 
     private final FotoPessoaService fotoPessoaService;
 
+    @Operation(
+        summary = "Upload de foto de pessoa",
+        description = "Faz o upload de uma foto para uma pessoa específica"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Foto enviada com sucesso",
+                    content = @Content(schema = @Schema(implementation = Map.class))),
+        @ApiResponse(responseCode = "400", description = "Parâmetros inválidos",
+                    content = @Content(schema = @Schema(implementation = Map.class))),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor",
+                    content = @Content(schema = @Schema(implementation = Map.class)))
+    })
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadFoto(
+            @Parameter(description = "Arquivo de imagem a ser enviado", required = true)
             @RequestParam("arquivo") MultipartFile arquivo,
+            @Parameter(description = "ID da pessoa à qual a foto será associada", required = true)
             @RequestParam("pessoaId") Integer pessoaId) {
 
         try {

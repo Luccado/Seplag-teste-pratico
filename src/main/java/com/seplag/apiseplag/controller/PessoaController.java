@@ -10,9 +10,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Controller
 @RequestMapping("/pessoa")
+@Tag(name = "Pessoas", description = "API para gerenciamento de pessoas")
 public class PessoaController {
 
     private final PessoaService pessoaService;
@@ -23,11 +29,21 @@ public class PessoaController {
         this.pessoaService = pessoaService;
     }
 
-    //GET
+    @Operation(
+        summary = "Listar todas as pessoas",
+        description = "Retorna uma página HTML com todas as pessoas cadastradas no sistema"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Página de pessoas carregada com sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping
     public String listarTodas(
+            @Parameter(description = "Número da página (começando em 0)")
             @RequestParam(defaultValue = "0") int pagina,
+            @Parameter(description = "Campo para ordenação")
             @RequestParam(defaultValue = "nome") String ordenarPor,
+            @Parameter(description = "Direção da ordenação (asc/desc)")
             @RequestParam(defaultValue = "asc") String direcao,
             Model model) {
 
@@ -43,22 +59,46 @@ public class PessoaController {
         return "pessoa/lista";
     }
 
-
-
-
+    @Operation(
+        summary = "Buscar pessoa por ID",
+        description = "Retorna uma página HTML com os detalhes de uma pessoa específica"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Página de detalhes da pessoa carregada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Pessoa não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/{id}")
-    public String buscarPorId(@PathVariable Integer id, Model model) {
+    public String buscarPorId(
+            @Parameter(description = "ID da pessoa", required = true)
+            @PathVariable Integer id, Model model) {
         pessoaService.buscarPorId(id).ifPresentOrElse(pessoa -> model.addAttribute("pessoa", pessoa), () -> model.addAttribute("erro", "Não foi encontrado a pessoa")
         );
         return "pessoa/detalhes";
     }
 
+    @Operation(
+        summary = "Exibir formulário de nova pessoa",
+        description = "Retorna uma página HTML com o formulário para criar uma nova pessoa"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Formulário carregado com sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/nova")
     public String exibirFormulario(Model model) {
         model.addAttribute("pessoa", new Pessoa());
         return "pessoa/formulario";
     }
 
+    @Operation(
+        summary = "Salvar nova pessoa",
+        description = "Cria uma nova pessoa no sistema"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Redirecionamento após sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @PostMapping("/salvar")
     public String salvar(@ModelAttribute Pessoa pessoa, RedirectAttributes redirectAttributes) {
         try{
@@ -69,12 +109,25 @@ public class PessoaController {
         return "redirect:/pessoa";
     }
 
+    @Operation(
+        summary = "Buscar pessoas por critérios",
+        description = "Retorna uma página HTML com pessoas que atendem aos critérios de busca"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Página de pessoas carregada com sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/buscar")
     public String buscar(
+        @Parameter(description = "Nome ou parte do nome da pessoa")
         @RequestParam(required = false) String nome,
+        @Parameter(description = "Sexo da pessoa (M/F)")
         @RequestParam(required = false) String sexo,
+        @Parameter(description = "Número da página (começando em 0)")
         @RequestParam(defaultValue = "0") int pagina,
+        @Parameter(description = "Campo para ordenação")
         @RequestParam(defaultValue = "nome") String ordenarPor,
+        @Parameter(description = "Direção da ordenação (asc/desc)")
         @RequestParam(defaultValue = "asc") String direcao,
         Model model){
 
@@ -95,8 +148,18 @@ public class PessoaController {
         return "pessoa/lista";
     }
 
+    @Operation(
+        summary = "Excluir pessoa",
+        description = "Remove uma pessoa do sistema"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "Redirecionamento após sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/deletar/{id}")
-    public String deletar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    public String deletar(
+            @Parameter(description = "ID da pessoa", required = true)
+            @PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
             pessoaService.deletar(id);
             redirectAttributes.addFlashAttribute("sucesso", "Pessoa excluída com sucesso!");
@@ -106,8 +169,19 @@ public class PessoaController {
         return "redirect:/pessoa";
     }
 
+    @Operation(
+        summary = "Exibir formulário de edição",
+        description = "Retorna uma página HTML com o formulário para editar uma pessoa existente"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Formulário carregado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Pessoa não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/editar/{id}")
-    public String editar(@PathVariable Integer id, Model model) {
+    public String editar(
+            @Parameter(description = "ID da pessoa", required = true)
+            @PathVariable Integer id, Model model) {
         pessoaService.buscarPorId(id)
                 .ifPresentOrElse(
                         pessoa -> model.addAttribute("pessoa", pessoa),
