@@ -176,7 +176,7 @@ minio.bucketName=fotos-pessoas
 
 1. Clone o repositório:
 ```bash
-git clone https://seu-repositorio/api-seplag.git
+git clone git@github.com:Luccado/Seplag-teste-pratico.git
 cd api-seplag
 ```
 
