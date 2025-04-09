@@ -1,7 +1,7 @@
 # API SEPLAG
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.x-green.svg)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12+-blue.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17.4-blue.svg)](https://www.postgresql.org/)
 [![MinIO](https://img.shields.io/badge/MinIO-Object%20Storage-orange.svg)](https://min.io/)
 [![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-green.svg)](https://swagger.io/)
 [![JUnit 5](https://img.shields.io/badge/JUnit%205-Testing-red.svg)](https://junit.org/junit5/)
@@ -11,21 +11,14 @@
 
 - [Sobre o Projeto](#-sobre-o-projeto)
 - [Funcionalidades Principais](#-funcionalidades-principais)
-- [Tecnologias Utilizadas](#-tecnologias-utilizadas)
   - [Justificativa das Escolhas Técnicas](#-justificativa-das-escolhas-técnicas)
-- [Configuração do Ambiente](#-configuração-do-ambiente)
-  - [Pré-requisitos](#-pré-requisitos)
-  - [Configuração do Banco de Dados](#-configuração-do-banco-de-dados)
-  - [Configuração do MinIO](#-configuração-do-minio)
-  - [Configuração com Docker](#-configuração-com-docker)
 - [Executando o Projeto](#-executando-o-projeto)
+  - [Pré-requisitos](#-pré-requisitos)
+  - [Executando com Docker Compose](#-executando-com-docker-compose)
 - [Documentação da API](#-documentação-da-api)
 - [Endpoints Principais](#-endpoints-principais)
 - [Exemplos de Uso](#-exemplos-de-uso)
 - [Testes](#-testes)
-- [Contribuindo](#-contribuindo)
-- [Licença](#-licença)
-- [Suporte](#-suporte)
 
 ## 🏢 Sobre o Projeto
 
@@ -67,43 +60,39 @@ A API SEPLAG é um sistema de gerenciamento de recursos humanos desenvolvido par
    - Fácil implantação e manutenção
    - Suporte a alta disponibilidade
 
-## ⚙️ Configuração do Ambiente
+## 🚀 Executando o Projeto
 
 ### 📋 Pré-requisitos
 
-- JDK 17 ou superior
-- Maven 3.6+
-- PostgreSQL 12+
-- MinIO Server
-- Docker e Docker Compose (opcional)
+- Docker
+- Docker Compose
+- Git
 
-### 🗄️ Configuração do Banco de Dados
+### ⚙️ Configuração do Ambiente
 
-1. Crie um banco de dados PostgreSQL:
-```sql
-CREATE DATABASE seplag;
+1. Clone o repositório:
+```bash
+git clone git@github.com:Luccado/Seplag-teste-pratico.git
+cd Seplag-teste-pratico
 ```
 
-2. Configure as credenciais no arquivo `application.properties`:
+2. Crie um arquivo `.env` na raiz do projeto:
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/seplag
-spring.datasource.username=seu_usuario
-spring.datasource.password=sua_senha
+# Banco de dados
+POSTGRES_DB=seplag
+POSTGRES_USER=seplag
+POSTGRES_PASSWORD=seplag123
+
+# MinIO
+MINIO_ROOT_USER=ROOTUSER
+MINIO_ROOT_PASSWORD=CHANGEME123
+MINIO_BUCKET_NAME=fotos-pessoa-seplag
+
+# Java
+JAVA_OPTS=-Xmx512m -Xms256m
 ```
 
-### 📦 Configuração do MinIO
-
-1. Configure as credenciais do MinIO no `application.properties`:
-```properties
-minio.endpoint=http://localhost:9000
-minio.accessKey=seu_access_key
-minio.secretKey=seu_secret_key
-minio.bucketName=fotos-pessoas
-```
-
-### 🐳 Configuração com Docker
-
-Para facilitar a configuração do ambiente, você pode usar Docker Compose para executar o PostgreSQL e o MinIO:
+### 🐳 Executando com Docker Compose
 
 1. Crie um arquivo `docker-compose.yml` na raiz do projeto:
 
@@ -111,13 +100,35 @@ Para facilitar a configuração do ambiente, você pode usar Docker Compose para
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: seplag-app
+    depends_on:
+      - postgres
+      - minio
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
+      - JAVA_OPTS=${JAVA_OPTS}
+    ports:
+      - "8080:8080"
+    networks:
+      - seplag-network
+
   postgres:
-    image: postgres:12
+    image: postgres:17.4
     container_name: seplag-postgres
     environment:
-      POSTGRES_DB: seplag
-      POSTGRES_USER: seplag
-      POSTGRES_PASSWORD: seplag123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -130,8 +141,8 @@ services:
     container_name: seplag-minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -149,48 +160,46 @@ networks:
     driver: bridge
 ```
 
-2. Execute o Docker Compose:
+2. Crie um arquivo `Dockerfile` na raiz do projeto:
 
+```dockerfile
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
+
+RUN chmod +x mvnw
+RUN ./mvnw package -DskipTests
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "target/api-seplag-0.0.1-SNAPSHOT.jar"]
+```
+
+3. Execute o projeto:
 ```bash
 docker-compose up -d
 ```
 
-3. Acesse o console do MinIO em `http://localhost:9001` e crie um bucket chamado `fotos-pessoas`.
+4. Aguarde alguns segundos para que todos os serviços iniciem e acesse:
+   - API: http://localhost:8080
+   - Swagger UI: http://localhost:8080/swagger-ui.html
+   - MinIO Console: http://localhost:9001 (login com as credenciais do .env)
 
-4. Atualize o `application.properties` para usar as credenciais do Docker:
-
-```properties
-# Banco de dados
-spring.datasource.url=jdbc:postgresql://localhost:5432/seplag
-spring.datasource.username=seplag
-spring.datasource.password=seplag123
-
-# MinIO
-minio.endpoint=http://localhost:9000
-minio.accessKey=minioadmin
-minio.secretKey=minioadmin
-minio.bucketName=fotos-pessoas
-```
-
-## 🚀 Executando o Projeto
-
-1. Clone o repositório:
+5. Para parar o projeto:
 ```bash
 git clone git@github.com:Luccado/Seplag-teste-pratico.git
-cd api-seplag
+cd Seplag-teste-pratico
 ```
 
-2. Compile o projeto:
+6. Para ver os logs:
 ```bash
-mvn clean install
+docker-compose logs -f
 ```
-
-3. Execute a aplicação:
-```bash
-mvn spring-boot:run
-```
-
-A aplicação estará disponível em `http://localhost:8080`
 
 ## 📚 Documentação da API
 
@@ -238,38 +247,23 @@ curl http://localhost:8080/api/unidades/1/servidores/efetivos \
 
 ## 🧪 Testes
 
-Execute os testes automatizados com:
+Para executar os testes dentro do container:
 ```bash
-mvn test
+docker-compose exec app ./mvnw test
 ```
 
 
 ## ⚠️ Aviso para Produção
 
-**IMPORTANTE**: As configurações de banco de dados e MinIO fornecidas neste README são apenas para desenvolvimento e testes. Em um ambiente de produção:
+**IMPORTANTE**: As configurações fornecidas neste README são apenas para desenvolvimento e testes. Em um ambiente de produção:
 
 1. **Altere todas as senhas e credenciais** para valores seguros e únicos
 2. **Configure conexões SSL/TLS** para o banco de dados e MinIO
-3. **Utilize variáveis de ambiente** em vez de valores hardcoded no `application.properties`
+3. **Utilize variáveis de ambiente** em vez de valores hardcoded
 4. **Implemente políticas de backup** para o banco de dados e arquivos
 5. **Configure firewalls e regras de segurança** adequadas
 6. **Utilize um proxy reverso** como Nginx para a API
 7. **Configure monitoramento e alertas** para o sistema
-
-Exemplo de uso de variáveis de ambiente em produção:
-
-```properties
-# Banco de dados
-spring.datasource.url=${DB_URL}
-spring.datasource.username=${DB_USERNAME}
-spring.datasource.password=${DB_PASSWORD}
-
-# MinIO
-minio.endpoint=${MINIO_ENDPOINT}
-minio.accessKey=${MINIO_ACCESS_KEY}
-minio.secretKey=${MINIO_SECRET_KEY}
-minio.bucketName=${MINIO_BUCKET_NAME}
-```
-
-
-
+8. **Utilize secrets do Docker** para gerenciar credenciais
+9. **Configure volumes persistentes** adequadamente
+10. **Implemente estratégias de backup e recuperação** 
