@@ -1,0 +1,50 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/apidb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+minio:
+  url: http://minio:9000
+  accessKey: ROOTUSER
+  secretKey: CHANGEME123
+  bucketName: foto-pessoa
+
+server:
+  port: 8080
+  
+logging:
+  level:
+    org.springframework: INFO
+    com.seplag.apiseplag: DEBUG
+    org.springframework.security: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /v3/api-docs
+        name: API SEPLAG
+  show-actuator: false
+  packages-to-scan: com.seplag.apiseplag.controller
+
+jwt:
+  secret: "SEcaEt7U45Cretq9f8ZDY5KaD9fJ4tgHJuYTGQseTR3FGeEqWerT34TG4G35"
+  expiration: 86400000  # 24 hours
+  refresh-expiration: 604800000  # 7 days 
