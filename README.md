@@ -14,7 +14,6 @@
   - [Justificativa das Escolhas Técnicas](#-justificativa-das-escolhas-técnicas)
 - [Executando o Projeto](#-executando-o-projeto)
   - [Pré-requisitos](#-pré-requisitos)
-  - [Executando com Docker Compose](#-executando-com-docker-compose)
 - [Documentação da API](#-documentação-da-api)
 - [Endpoints Principais](#-endpoints-principais)
 - [Exemplos de Uso](#-exemplos-de-uso)
@@ -77,7 +76,10 @@ Projeto prático para Processo seletivo Seplag 2025
 
 1. Clone o repositório:
 ```bash
-git clone git@github.com:Luccado/Seplag-teste-pratico.git
+git clone https://github.com/Luccado/Seplag-teste-pratico.git
+```
+
+```bash
 cd Seplag-teste-pratico
 ```
 
@@ -109,16 +111,6 @@ docker-compose up -d
    - Swagger UI: http://localhost:8080/swagger-ui.html
    - MinIO Console: http://localhost:9001 (login com as credenciais do .env)
 
-5. Para parar o projeto:
-```bash
-git clone git@github.com:Luccado/Seplag-teste-pratico.git
-cd Seplag-teste-pratico
-```
-
-6. Para ver os logs:
-```bash
-docker-compose logs -f
-```
 
 ## 📚 Documentação da API
 
